@@ -1,0 +1,10 @@
+{% extends 'scanner/base.html' %}{% block title %}Medicine database{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Medicine database</h1><p class="muted">{{ medicines|length }} medicine{{ medicines|length|pluralize }}, listed by generic name.</p></div>
+  <form method="get" style="min-width:260px"><input type="search" name="q" value="{{ q }}" placeholder="Search name, brand or class" aria-label="Search medicines"></form></div>
+<div class="card flat"><div class="tablewrap"><table>
+  <thead><tr><th>ID</th><th>Generic name</th><th>Brand names</th><th>Class</th><th>Strengths</th></tr></thead>
+  <tbody>{% for m in medicines %}<tr><td>{{ m.code }}</td><td><a href="{% url 'medicine_detail' m.pk %}"><b>{{ m.generic_name }}</b></a></td><td>{{ m.brand_names }}</td><td>{{ m.therapeutic_class }}</td><td>{{ m.strengths }}</td></tr>
+  {% empty %}<tr><td colspan="5" class="muted">No medicines match "{{ q }}". Try a generic name.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

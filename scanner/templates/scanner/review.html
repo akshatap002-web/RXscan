@@ -1,0 +1,36 @@
+{% extends 'scanner/base.html' %}{% block title %}Review {{ rx.code }}{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Review {{ rx.code }}</h1><p class="muted">Compare the image with each suggestion. Choose "Not a medicine / reject" if the text can't be confirmed.</p></div>
+  <span class="badge st-{{ rx.status }}">{{ rx.get_status_display }}</span></div>
+<form method="post">{% csrf_token %}
+<div class="split">
+  <div class="card" style="position:sticky;top:1rem"><h2>Original</h2>
+    {% if rx.display_url %}<img src="{{ rx.display_url }}" alt="Uploaded prescription">{% else %}<p class="muted">{{ rx.filename }}</p>{% endif %}
+    <details><summary>Text read from the image</summary><pre class="ocr">{{ rx.ocr_text }}</pre></details>
+    {% if rx.conditions or rx.allergies %}<p class="small"><b>Conditions:</b> {{ rx.conditions|default:"none entered" }}<br><b>Allergies:</b> {{ rx.allergies|default:"none entered" }}</p>{% endif %}
+  </div>
+  <div>
+    {% include 'scanner/_safety.html' %}
+    {% for it in items %}
+    <article class="med">
+      <header><div><b>Read as:</b> "{{ it.detected_text }}"</div><span class="badge b-{{ it.band }}">{{ it.band_label }}</span></header>
+      {% include 'scanner/_conf.html' with value=it.confidence band=it.band %}
+      {% if it.note %}<div class="notice warn small" style="margin-top:.6rem">{{ it.note }}</div>{% endif %}
+      <label for="med_{{ it.id }}">Medicine</label>
+      <select id="med_{{ it.id }}" name="med_{{ it.id }}">
+        <option value="">Not a medicine / reject</option>
+        {% for m in all_medicines %}<option value="{{ m.pk }}" {% if it.medicine_id == m.pk %}selected{% endif %}>{{ m.generic_name }}</option>{% endfor %}
+      </select>
+      <div class="formgrid">
+        <div><label for="s{{ it.id }}">Strength</label><input type="text" id="s{{ it.id }}" name="strength_{{ it.id }}" value="{{ it.strength }}"></div>
+        <div><label for="f{{ it.id }}">Frequency</label><input type="text" id="f{{ it.id }}" name="frequency_{{ it.id }}" value="{{ it.frequency }}"></div>
+        <div><label for="d{{ it.id }}">Duration</label><input type="text" id="d{{ it.id }}" name="duration_{{ it.id }}" value="{{ it.duration }}"></div>
+      </div>
+    </article>
+    {% endfor %}
+    <div class="card"><label for="remarks" style="margin-top:0">Remarks (optional)</label><textarea id="remarks" name="remarks" rows="3"></textarea>
+      <button class="btn" type="submit" style="margin-top:1rem">Approve and verify</button></div>
+  </div>
+</div>
+</form>
+{% endblock %}

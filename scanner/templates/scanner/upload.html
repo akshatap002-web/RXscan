@@ -1,0 +1,16 @@
+{% extends 'scanner/base.html' %}{% block title %}Scan prescription{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Scan a prescription</h1><p class="muted">Upload a clear, well-lit photo or PDF. The scanner reads the text and matches it to the medicine database.</p></div></div>
+<form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
+  <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>{{ form.image }}{{ form.image.errors }}
+  <span class="help">JPG, PNG or PDF, up to 8 MB. Lay the page flat and avoid shadows.</span>
+  <div class="formgrid">
+    <div><label for="{{ form.age_group.id_for_label }}">{{ form.age_group.label }}</label>{{ form.age_group }}</div>
+    <div><label for="{{ form.conditions.id_for_label }}">Medical conditions</label>{{ form.conditions }}</div>
+    <div><label for="{{ form.allergies.id_for_label }}">Allergies</label>{{ form.allergies }}</div>
+  </div>
+  <span class="help">Conditions and allergies are only used to show warnings from the database.</span>
+  <details style="margin-top:1rem"><summary>{{ form.manual_text.label }}</summary>{{ form.manual_text }}<span class="help">{{ form.manual_text.help_text }}</span></details>
+  <button class="btn" type="submit" style="margin-top:1.25rem">Scan prescription</button>
+</form>
+{% endblock %}

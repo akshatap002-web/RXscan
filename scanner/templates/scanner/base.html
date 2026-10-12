@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Prescription Scanner{% endblock %} | RxScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{% static 'scanner/css/style.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="{% url 'home' %}">{% include 'scanner/_logo.html' %} RxScan</a>
+    {% if is_pharmacist %}
+      <a class="nav {% if request.resolver_match.url_name == 'pharmacist_dashboard' or request.resolver_match.url_name == 'review' %}active{% endif %}" href="{% url 'pharmacist_dashboard' %}">Review queue</a>
+    {% endif %}
+    <a class="nav {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
+    <a class="nav {% if request.resolver_match.url_name == 'upload' %}active{% endif %}" href="{% url 'upload' %}">Scan prescription</a>
+    <a class="nav {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'history' %}">Previous scans</a>
+    <a class="nav {% if request.resolver_match.url_name == 'medicines' or request.resolver_match.url_name == 'medicine_detail' %}active{% endif %}" href="{% url 'medicines' %}">Medicine database</a>
+    <div class="spacer"></div>
+    <div class="userbox">
+      <strong>{{ user.first_name|default:user.username }}</strong>
+      {% if is_pharmacist %}Pharmacist / Doctor{% else %}Patient{% endif %}
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+    </div>
+  </aside>
+  <main>
+    {% for m in messages %}<div class="notice info" role="status">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+  {% block auth %}{% endblock %}
+{% endif %}
+</body>
+</html>

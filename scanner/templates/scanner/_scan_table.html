@@ -1,0 +1,12 @@
+{% if scans %}
+<div class="tablewrap"><table>
+  <thead><tr><th>ID</th><th>Uploaded</th><th>File</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for s in scans %}
+    <tr><td>{{ s.code }}</td><td>{{ s.uploaded_at|date:"d M Y, H:i" }}</td><td>{{ s.filename|truncatechars:28 }}</td>
+    <td><span class="badge st-{{ s.status }}">{{ s.get_status_display }}</span></td>
+    <td><a href="{% url 'result' s.pk %}">View result</a></td></tr>
+  {% endfor %}</tbody>
+</table></div>
+{% else %}
+<p style="padding:1.25rem 1.4rem" class="muted">No scans yet. <a href="{% url 'upload' %}">Scan your first prescription</a>.</p>
+{% endif %}

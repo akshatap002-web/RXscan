@@ -1,0 +1,66 @@
+{% extends 'scanner/base.html' %}{% block title %}Prescription {{ rx.code }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Prescription analysis <span class="muted" style="font-weight:500">{{ rx.code }}</span></h1>
+  <p class="muted">Uploaded {{ rx.uploaded_at|date:"d M Y, H:i" }}</p></div>
+  <span class="badge st-{{ rx.status }}" style="font-size:.95rem">{{ rx.get_status_display }}</span>
+</div>
+
+{% if rx.status == 'unreadable' %}
+  <div class="notice bad"><b>This prescription could not be read.</b><p style="margin:.3rem 0 0">{{ rx.status_note }}</p></div>
+  <a class="btn" href="{% url 'upload' %}">Upload a clearer image</a>
+{% else %}
+<div class="split">
+  <div class="card">
+    <h2>Original</h2>
+    {% if rx.display_url %}<img src="{{ rx.display_url }}" alt="Uploaded prescription">{% else %}<p class="muted">PDF file: {{ rx.filename }}</p>{% endif %}
+    <p class="small muted" style="margin-top:.75rem">Scanner reading confidence: <b>{{ rx.ocr_confidence|floatformat:0 }}%</b></p>
+    <details><summary>Text read from the image</summary><pre class="ocr">{{ rx.ocr_text }}</pre></details>
+    {% if rx.age_group %}<p class="small muted">Age group: {{ rx.get_age_group_display }}</p>{% endif %}
+  </div>
+  <div>
+    {% if rx.status == 'verified' %}
+      <div class="notice info"><b>Verified by a pharmacist.</b>
+      {% if last_verification %}<p class="small" style="margin:.3rem 0 0">{{ last_verification.pharmacist.first_name|default:last_verification.pharmacist.username }}, {{ last_verification.verified_at|date:"d M Y" }}{% if last_verification.remarks %}. Remarks: {{ last_verification.remarks }}{% endif %}</p>{% endif %}</div>
+    {% elif rx.status == 'pending_review' %}
+      <div class="notice warn"><b>Verification required.</b> Some results are uncertain, so a pharmacist will review them. Do not rely on them until then.</div>
+    {% else %}
+      <div class="notice info">The scanner matched every medicine with high confidence. This is not yet pharmacist verified.
+        {% if rx.user == user %}<form method="post" action="{% url 'request_review' rx.pk %}" style="margin-top:.6rem">{% csrf_token %}<button class="btn ghost sm" type="submit">Ask a pharmacist to verify</button></form>{% endif %}</div>
+    {% endif %}
+
+    {% include 'scanner/_safety.html' %}
+
+    {% for it in items %}
+    <article class="med">
+      <header>
+        <div><h2 style="margin:0">{% if it.medicine %}{{ it.medicine.generic_name }}{% else %}Unidentified: "{{ it.detected_text }}"{% endif %}</h2>
+          {% if it.medicine %}<span class="muted small">{{ it.medicine.therapeutic_class }}{% if it.detected_text|lower != it.medicine.generic_name|lower %}. Read as "{{ it.detected_text }}"{% endif %}</span>{% endif %}</div>
+        <span class="badge b-{{ it.band }}">{{ it.band_label }}</span>
+      </header>
+      {% include 'scanner/_conf.html' with value=it.confidence band=it.band %}
+      <div class="meta">
+        <div><small>Strength</small><b>{{ it.strength|default:"Not detected" }}</b></div>
+        <div><small>Frequency</small><b>{{ it.frequency|default:"Not detected" }}</b></div>
+        <div><small>Duration</small><b>{{ it.duration|default:"Not detected" }}</b></div>
+      </div>
+      <p class="small muted" style="margin-top:-.25rem">Prescription dosage as detected. Verification required before use.</p>
+      {% if it.note %}<div class="notice warn small">{{ it.note }}</div>{% endif %}
+      {% if it.band != 'high' and it.band != 'verified' and it.alternatives %}
+        <p class="small"><b>Possible matches:</b> {% for a in it.alternatives %}{{ a.name }} ({{ a.score|floatformat:0 }}%){% if not forloop.last %}, {% endif %}{% endfor %}</p>
+      {% endif %}
+      {% if it.medicine %}
+      <div class="cols" style="margin-top:.75rem">
+        <div><h3>Common uses</h3><ul>{% for x in it.medicine.uses_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+        <div><h3>Possible side effects</h3><ul>{% for x in it.medicine.side_effects_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+        <div><h3>Contraindications</h3><ul>{% for x in it.medicine.contraindications_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+      </div>
+      <p style="margin-top:.75rem"><a href="{% url 'medicine_detail' it.medicine.pk %}">Full medicine information, including age-group reference</a></p>
+      {% endif %}
+    </article>
+    {% endfor %}
+    <div class="disclaimer">Information is for reference. This system does not prescribe or recommend a dose. Consult a qualified healthcare professional.</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

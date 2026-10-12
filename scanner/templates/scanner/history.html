@@ -1,0 +1,5 @@
+{% extends 'scanner/base.html' %}{% block title %}Previous scans{% endblock %}
+{% block content %}
+<div class="pagehead"><h1>Previous scans</h1><a class="btn" href="{% url 'upload' %}">Scan prescription</a></div>
+<div class="card flat">{% include 'scanner/_scan_table.html' %}</div>
+{% endblock %}

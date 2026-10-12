@@ -1,0 +1,15 @@
+{% if safety.interactions %}
+<div class="card"><h2>Potential interactions</h2>
+  {% for i in safety.interactions %}
+  <div class="notice {% if i.severity == 'major' %}bad{% else %}warn{% endif %}">
+    <b>{{ i.medicine_a.generic_name }} + {{ i.medicine_b.generic_name }}</b> <span class="badge sev-{{ i.severity }}">{{ i.get_severity_display }}</span>
+    <p style="margin:.3rem 0 0">{{ i.description }} Please consult a pharmacist or doctor.</p>
+  </div>{% endfor %}
+</div>{% endif %}
+{% if safety.patient_warnings or safety.duplicates %}
+<div class="card"><h2>Warnings to check</h2>
+  {% if safety.patient_warnings %}<div class="notice warn"><b>Based on the conditions and allergies entered</b><ul>
+    {% for name, text in safety.patient_warnings %}<li><b>{{ name }}:</b> {{ text }}</li>{% endfor %}</ul>
+    <p class="small" style="margin:.5rem 0 0">Professional verification required.</p></div>{% endif %}
+  {% if safety.duplicates %}<div class="notice warn"><b>Possible duplicate therapy</b><ul>{% for d in safety.duplicates %}<li>{{ d }}</li>{% endfor %}</ul></div>{% endif %}
+</div>{% endif %}

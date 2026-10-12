@@ -1,0 +1,15 @@
+{% extends 'scanner/base.html' %}{% block title %}Pharmacist dashboard{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>Pharmacist dashboard</h1><p class="muted">Check OCR results against the original prescription and confirm each medicine.</p></div></div>
+<div class="grid g4" style="margin-bottom:1.5rem">
+  <div class="stat warn"><b>{{ pending }}</b><span>Pending reviews</span></div>
+  <div class="stat"><b>{{ verified }}</b><span>Verified</span></div>
+  <div class="stat warn"><b>{{ low }}</b><span>Low confidence</span></div>
+</div>
+<div class="card flat"><div style="padding:1.1rem 1.4rem .2rem"><h2>Review queue</h2></div>
+{% if queue %}<div class="tablewrap"><table>
+  <thead><tr><th>ID</th><th>Patient</th><th>Uploaded</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for s in queue %}<tr><td>{{ s.code }}</td><td>{{ s.user.first_name|default:s.user.username }}</td><td>{{ s.uploaded_at|date:"d M Y, H:i" }}</td>
+  <td><span class="badge st-{{ s.status }}">{{ s.get_status_display }}</span></td><td><a class="btn sm" href="{% url 'review' s.pk %}">Review</a></td></tr>{% endfor %}</tbody>
+</table></div>{% else %}<p style="padding:1.25rem 1.4rem" class="muted">The queue is empty. New uploads that need checking will appear here.</p>{% endif %}</div>
+{% endblock %}

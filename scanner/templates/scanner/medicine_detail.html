@@ -1,0 +1,19 @@
+{% extends 'scanner/base.html' %}{% block title %}{{ m.generic_name }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{% url 'medicines' %}">Back to medicine database</a></p>
+<div class="pagehead"><div><h1>{{ m.generic_name }}</h1><p class="muted">{{ m.therapeutic_class }}. {{ m.code }}</p></div></div>
+<div class="grid g2">
+  <div class="card"><h2>Common uses</h2><ul>{% for x in m.uses_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  <div class="card"><h2>Possible side effects</h2><ul>{% for x in m.side_effects_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  <div class="card"><h2>Contraindications</h2><ul>{% for x in m.contraindications_list %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  <div class="card"><h2>Precautions</h2><ul>{% for x in m.precautions_list %}<li>{{ x }}</li>{% empty %}<li class="muted">None stored.</li>{% endfor %}</ul></div>
+</div>
+<div class="card"><h2>Names and strengths</h2>
+  <p><b>Brand names:</b> {{ m.brand_names|default:"None stored" }}</p><p><b>Available strengths:</b> {{ m.strengths|default:"None stored" }}</p></div>
+<div class="card"><h2>Age-group reference information</h2>
+  <div class="notice warn small">Reference only. Dose depends on the medical condition, other medicines, formulation and patient characteristics. Verify with a qualified healthcare professional.</div>
+  {% for label, text in m.age_groups %}<details {% if forloop.first %}open{% endif %}><summary>{{ label }}</summary><p>{{ text }}</p></details>{% endfor %}
+</div>
+<p class="small muted">Source: {{ m.source }}. Last updated {{ m.last_updated|date:"d M Y" }}.</p>
+<div class="disclaimer">Information is for reference. Consult a qualified healthcare professional.</div>
+{% endblock %}

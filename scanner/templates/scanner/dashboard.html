@@ -1,0 +1,16 @@
+{% extends 'scanner/base.html' %}{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>Hello, {{ user.first_name|default:user.username }}</h1><p class="muted">Scan a prescription or review your earlier results.</p></div>
+  <a class="btn" href="{% url 'upload' %}">Scan prescription</a>
+</div>
+<div class="grid g4" style="margin-bottom:1.5rem">
+  <div class="stat"><b>{{ total }}</b><span>Total scans</span></div>
+  <div class="stat"><b>{{ verified }}</b><span>Pharmacist verified</span></div>
+  <div class="stat warn"><b>{{ pending }}</b><span>Awaiting verification</span></div>
+  <div class="stat warn"><b>{{ unreadable }}</b><span>Needs a clearer image</span></div>
+</div>
+<div class="card flat"><div style="padding:1.1rem 1.4rem .2rem"><h2>Recent scans</h2></div>
+{% include 'scanner/_scan_table.html' %}</div>
+<div class="disclaimer">Information is for reference. Consult a qualified healthcare professional before taking any medicine.</div>
+{% endblock %}
